@@ -1,26 +1,40 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Cookie Manager</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-    li {
-      margin: 5px 0;
-    }
-    button {
-      margin-left: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Cookie Manager</h1>
-  <div id="cookie-list"></div>
-  <script src="popup.js"></script>
-</body>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manager Cookie-uri</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 10px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+      }
+      button {
+        margin-left: 15px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Manager de Cookie-uri</h1>
+    <p>Afișăm lista cookie-urilor pentru domeniul curent:</p>
+    <div id="cookie-list"></div>
+    <script src="popup.js"></script>
+  </body>
 </html>

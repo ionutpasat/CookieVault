@@ -1,7 +1,7 @@
 // Obține și afișează lista de cookie-uri
 function loadCookies() {
   const cookieList = document.getElementById('cookie-list');
-  cookieList.innerHTML = "<ul>Loading cookies...</ul>";
+  cookieList.innerHTML = "<ul>Încărcăm lista de cookie-uri...</ul>";
   
   // Obține toate cookie-urile pentru domeniul curent
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -10,6 +10,11 @@ function loadCookies() {
       cookieList.innerHTML = '';  // Golește lista înainte de afișare
       const ul = document.createElement('ul');
 
+      if (cookies.length === 0) {
+        cookieList.innerHTML = '<p>Nu există cookie-uri pentru acest domeniu.</p>';
+        return;
+      }
+
       cookies.forEach(cookie => {
         const li = document.createElement('li');
         li.textContent = `${cookie.name} (${cookie.domain})`;
@@ -17,6 +22,7 @@ function loadCookies() {
         // Buton pentru ștergerea cookie-ului
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Șterge';
+        deleteButton.style.marginLeft = "10px";
         deleteButton.onclick = () => removeCookie(cookie);
 
         li.appendChild(deleteButton);
@@ -38,6 +44,7 @@ function removeCookie(cookie) {
     if (chrome.runtime.lastError) {
       console.error("Eroare la ștergerea cookie-ului:", chrome.runtime.lastError);
     } else {
+      alert(`Cookie-ul "${cookie.name}" a fost șters.`);
       loadCookies();  // Reîncarcă lista după ștergere
     }
   });
