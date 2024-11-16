@@ -57,7 +57,10 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
   if (!changeInfo.removed) {
     const cookie = changeInfo.cookie;
     getCurrentTabDomain((currentDomain) => {
-      if (currentDomain && !isCurrentDomainOrGoogleCookie(cookie, currentDomain)) {
+      if (currentDomain && !isCurrentDomainOrGoogleCookie(cookie, currentDomain) 
+        && !cookie.name.toLowerCase().includes("auth")
+        && !cookie.name.toLowerCase().includes("sess")
+        && !cookie.name.toLowerCase().includes("sid")) {
         chrome.cookies.remove({
           url: `https://${cookie.domain}${cookie.path}`,
           name: cookie.name
@@ -65,7 +68,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
           if (chrome.runtime.lastError) {
             console.error("Error removing cookie:", chrome.runtime.lastError);
           } else {
-            console.log(`Different domain cookie removed: ${cookie.name}`);
+            console.log(`Different domain cookie removed: ${cookie.name} from ${cookie.domain} with value: ${cookie.value}`);
           }
         });
       }
@@ -73,17 +76,23 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
     if (isAdvertisingCookie(cookie)) {
       // Remove the cookie if it is an advertising cookie
-      chrome.cookies.remove({
-        url: `https://${cookie.domain}${cookie.path}`,
-        name: cookie.name
-      }, () => {
-        if (chrome.runtime.lastError) {
-          console.error("Error removing cookie:", chrome.runtime.lastError);
-        } else {
-          console.log(`Advertising cookie removed: ${cookie.name}`);
+      getCurrentTabDomain((currentDomain) => {
+        if (currentDomain && !isCurrentDomainOrGoogleCookie(cookie, currentDomain)) {
+          chrome.cookies.remove({
+            url: `https://${cookie.domain}${cookie.path}`,
+            name: cookie.name
+          }, () => {
+            if (chrome.runtime.lastError) {
+              console.error("Error removing cookie:", chrome.runtime.lastError);
+            } else {
+              console.log(`Advertising cookie removed: ${cookie.name}  from ${cookie.domain} with value: ${cookie.value}`);
+            }
+          });
         }
       });
     }
+
+    processAllCookies();
   }
 });
 
@@ -92,14 +101,18 @@ function processAllCookies() {
     cookies.forEach((cookie) => {
       if (isAdvertisingCookie(cookie)) {
         // Remove the cookie if it is an advertising cookie
-        chrome.cookies.remove({
-          url: `https://${cookie.domain}${cookie.path}`,
-          name: cookie.name
-        }, () => {
-          if (chrome.runtime.lastError) {
-            console.error("Error removing cookie:", chrome.runtime.lastError);
-          } else {
-            console.log(`Advertising cookie removed: ${cookie.name}`);
+        getCurrentTabDomain((currentDomain) => {
+          if (currentDomain && !isCurrentDomainOrGoogleCookie(cookie, currentDomain)) {
+            chrome.cookies.remove({
+              url: `https://${cookie.domain}${cookie.path}`,
+              name: cookie.name
+            }, () => {
+              if (chrome.runtime.lastError) {
+                console.error("Error removing cookie:", chrome.runtime.lastError);
+              } else {
+                console.log(`Advertising cookie removed: ${cookie.name}  from ${cookie.domain} with value: ${cookie.value}`);
+              }
+            });
           }
         });
       }
@@ -111,22 +124,27 @@ function processAllCookies() {
 // Funcție care verifică dacă un cookie este de advertising
 function isAdvertisingCookie(cookie) {
   // Aici definești criteriile pentru cookie-urile de advertising.
-  const advertisingKeywords = ["ad", "tracker", "marketing", "ga", "gid", "gpi", "gcl", "gckp", "gs", "debug", "gads", "fbp", "fr", " fbc",
-    "cto_bundle", "ide", "uetsid", "uetvid", "track", "tr", "cm360", "drt", "anj", "sess", "uuid", "uid", "apmplitude",
-    "rtn1-z", "analytics", "doubleclick", "pixel", "utm", "retarget", "facebook", "criteo", "bing", "google",
-    "cb", "eoi", "bts", "cb"
+  const advertisingKeywords = ["ad", "tracker", "marketing", "_ga", "gid", "gpi", "gcl", "gckp", "gs", "debug", "gads", "fbp", "fr", " fbc",
+    "cto_bundle", "ide", "uetsid", "uetvid", "track", "tr", "cm360", "drt", "anj", "uid", "apmplitude",
+    "rtn1-z", "analytics", "doubleclick", "pixel", "utm", "retarget", "facebook", "criteo", "bing",
+    "cb", "eoi", "bts", "cb", "cookie", "bounce"
   ];
   const domainKeywords = [".doubleclick.net", ".googleadservices.com", "facebook.com", "criteo.com", "bing.com",
-    "adnxs.com", "adsrvr.org", "adform.net", "adnxs.com", "advertising.com", "advertising.com",
-    "adsymptotic.com", "adtech.com", "adtechus.com", "advertising.com", "advertising.com", "adsrvr.org"
+    "adnxs.com", "adsrvr.org", "adform.net", "adnxs.com", "advertising.com",
+    "adsymptotic.com", "adtech.com", "adtechus.com", "advertising.com", "advertising.com", "adsrvr.org",
+    "rubiconproject.com"
   ];
-
-  console.log(cookie.domain);
+  
+  // console.log(cookie.domain);
 
   const cookieName = cookie.name.toLowerCase();
   const cookieValue = cookie.value.toLowerCase();
   const cookieDomain = cookie.domain.toLowerCase();
 
-  return advertisingKeywords.some(keyword => cookieName.includes(keyword) || cookieValue.includes(keyword))
+  if (cookieName.includes("gaps")) {
+    return false;
+  }
+
+  return advertisingKeywords.some(keyword => cookieName.includes(keyword))
   || domainKeywords.some(domainKeyword => cookieDomain.includes(domainKeyword));
 }

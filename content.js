@@ -4,7 +4,7 @@ function removeConsentAndCookieElements() {
   
     // Select elements by common attributes used in cookie consent popups
     const consentElements = document.querySelectorAll(
-      'div[id*="consent"], div[id*="cookie"], div[id*="termsfeed"], div[id*="sp_message_container"], [role="dialog"], .cookie-consent, .cookie-banner, .cookie-popup, .consent-banner, .consent-popup'
+      'div[id*="consent"], div[id*="cookie"], div[id*="termsfeed"], div[id*="sp_message_container"], [role="dialog"], [class="absolute inset-0"], .cookie-consent, .cookie-banner, .cookie-popup, .consent-banner, .consent-popup'
     );
   
     console.log(`Found ${consentElements.length} elements related to consent or cookies`);

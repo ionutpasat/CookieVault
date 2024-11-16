@@ -6,7 +6,7 @@
         "type": "block"
       },
       "condition": {
-        "urlFilter": "ad|tracker|marketing|ga|gid|gpi|gads|fbp|fr|fbc|cto_bundle|ide|uetsid|uetvid|track|tr|cm360|drt|anj|sess|uuid|apmplitude|rtn1-z|analytics|doubleclick|pixel|utm|retarget|facebook|criteo|bing|google|cookie",
+        "urlFilter": "ad|tracker|marketing|ga|gid|gpi|gads|fbp|fr|fbc|cto_bundle|ide|uetsid|uetvid|track|tr|cm360|drt|anj|uuid|apmplitude|rtn1-z|analytics|doubleclick|pixel|utm|retarget|facebook|criteo|bing|cookie",
         "resourceTypes": ["main_frame", "sub_frame", "script", "image", "stylesheet", "xmlhttprequest", "other"]
       }
     }
