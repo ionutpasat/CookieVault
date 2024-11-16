@@ -2,39 +2,35 @@
 <html lang="ro">
   <head>
     <meta charset="UTF-8" />
-    <title>Manager Cookie-uri</title>
+    <title>CookieVault</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        padding: 10px;
+        text-align: center;
       }
       ul {
         list-style-type: none;
         padding: 0;
       }
       li {
-        margin: 8px 0;
-        display: flex;
-        align-items: center;
+        margin: 5px 0;
       }
       button {
-        margin-left: 15px;
-        padding: 5px 10px;
-        cursor: pointer;
-        border: 1px solid #ddd;
-        background-color: #f5f5f5;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
+        margin-left: 10px;
+        margin-right: 10px;
       }
-      button:hover {
-        background-color: #ddd;
+      #delete-all-button {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        display: block;
       }
     </style>
   </head>
   <body>
-    <h1>Manager de Cookie-uri</h1>
-    <p>Afișăm lista cookie-urilor pentru domeniul curent:</p>
+    <h1>Cookie Manager</h1>
     <div id="cookie-list"></div>
+    <!-- Buton pentru ștergerea tuturor cookie-urilor -->
+    <button id="delete-all-button">Șterge toate cookie-urile</button>
     <script src="popup.js"></script>
   </body>
 </html>
