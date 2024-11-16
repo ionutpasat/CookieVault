@@ -8,6 +8,14 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
         name: cookie.name
       });
     }
+    if (isConsentCookie(cookie)) {
+      // adauga cookie-ul de consent
+      chrome.cookies.set({
+        url: `https://${cookie.domain}${cookie.path}`,
+        name: cookie.name,
+        value: cookie.value
+      });
+    }
   }
 });
 
@@ -16,4 +24,11 @@ function isAdvertisingCookie(cookie) {
   // Aici definești criteriile pentru cookie-urile de advertising.
   const advertisingKeywords = ["ad", "tracker", "marketing"];
   return advertisingKeywords.some(keyword => cookie.name.includes(keyword));
+}
+
+// Funcție care verifică dacă un cookie este de consent
+function isConsentCookie(cookie) {
+  // Aici definești criteriile pentru cookie-urile de consent.
+  const consentKeywords = ["cookie", "consent"];
+  return consentKeywords.some(keyword => cookie.name.includes(keyword));
 }
