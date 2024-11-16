@@ -90,12 +90,20 @@ const rightSelector = document.querySelector('.right-selector');
 slider.style.transform = 'translateX(0)'; // Initially under the left selector
 
 // Add click event listener for the left selector
+// Select the block-all-cookies container
+// Select the block-all-cookies container
+const blockAllCookiesContainer = document.querySelector('.block-all-cookies');
+
+// Add click event listener for the left selector
 leftSelector.addEventListener('click', function () {
   // Move slider to the left
   slider.style.transform = 'translateX(0)';
   // Update selected states
   leftSelector.classList.add('selected');
   rightSelector.classList.remove('selected');
+  
+  // Show the "block all cookies" button when 'this site' is selected
+  blockAllCookiesContainer.classList.remove('hide');
 });
 
 // Add click event listener for the right selector
@@ -105,4 +113,39 @@ rightSelector.addEventListener('click', function () {
   // Update selected states
   rightSelector.classList.add('selected');
   leftSelector.classList.remove('selected');
+  
+  // Hide the "block all cookies" button when 'all sites' is selected
+  blockAllCookiesContainer.classList.add('hide');
 });
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const deleteAllButton = document.getElementById('delete-all-button');
+  deleteAllButton.addEventListener('click', removeAllCookies);
+
+  loadCookies();
+});
+
+// Function to toggle blocking cookies
+function toggleBlockCookies() {
+  const isBlocked = document.getElementById('block-all-switch').checked;
+
+  if (isBlocked) {
+    // If checked, block all cookies (you can customize this logic further)
+    chrome.cookies.getAll({}, (cookies) => {
+      cookies.forEach((cookie) => {
+        chrome.cookies.remove({
+          url: `https://${cookie.domain}${cookie.path}`,
+          name: cookie.name,
+        });
+      });
+    });
+  } else {
+    // If unchecked, allow cookies (you can customize this logic further if needed)
+    console.log('Allow cookies'); // This could be an extension feature to track cookie behavior
+  }
+}
+
+// Event listener for the block cookies switch
+document.getElementById('block-all-switch').addEventListener('change', toggleBlockCookies);
