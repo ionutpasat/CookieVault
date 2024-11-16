@@ -92,6 +92,7 @@ slider.style.transform = 'translateX(0)'; // Initially under the left selector
 // Add click event listener for the left selector
 // Select the block-all-cookies container
 // Select the block-all-cookies container
+const switchGridContainer = document.querySelector('.switch-grid');
 const blockAllCookiesContainer = document.querySelector('.block-all-cookies');
 
 // Add click event listener for the left selector
@@ -104,9 +105,12 @@ leftSelector.addEventListener('click', function () {
   
   // Show the "block all cookies" button when 'this site' is selected
   blockAllCookiesContainer.classList.remove('hide');
+  
+  // Hide the 2x2 grid of switches when 'this site' is selected
+  switchGridContainer.classList.add('hide');
 });
 
-// Add click event listener for the right selector
+// Add click event listener for the right selector (all sites selected)
 rightSelector.addEventListener('click', function () {
   // Move slider to the right
   slider.style.transform = 'translateX(100%)'; // 100% matches the width of one button
@@ -116,6 +120,9 @@ rightSelector.addEventListener('click', function () {
   
   // Hide the "block all cookies" button when 'all sites' is selected
   blockAllCookiesContainer.classList.add('hide');
+  
+  // Show the 2x2 grid of switches when 'all sites' is selected
+  switchGridContainer.classList.remove('hide');
 });
 
 
