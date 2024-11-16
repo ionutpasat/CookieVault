@@ -79,3 +79,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadCookies();
 });
+
+
+// Select the elements
+const slider = document.querySelector('.slider');
+const leftSelector = document.querySelector('.left-selector');
+const rightSelector = document.querySelector('.right-selector');
+
+// Set default position for the slider
+slider.style.transform = 'translateX(0)'; // Initially under the left selector
+
+// Add click event listener for the left selector
+leftSelector.addEventListener('click', function () {
+  // Move slider to the left
+  slider.style.transform = 'translateX(0)';
+  // Update selected states
+  leftSelector.classList.add('selected');
+  rightSelector.classList.remove('selected');
+});
+
+// Add click event listener for the right selector
+rightSelector.addEventListener('click', function () {
+  // Move slider to the right
+  slider.style.transform = 'translateX(100%)'; // 100% matches the width of one button
+  // Update selected states
+  rightSelector.classList.add('selected');
+  leftSelector.classList.remove('selected');
+});

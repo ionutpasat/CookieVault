@@ -2,35 +2,31 @@
 <html lang="ro">
   <head>
     <meta charset="UTF-8" />
-    <title>CookieVault</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-      ul {
-        list-style-type: none;
-        padding: 0;
-      }
-      li {
-        margin: 5px 0;
-      }
-      button {
-        margin-left: 10px;
-        margin-right: 10px;
-      }
-      #delete-all-button {
-        margin-top: 20px;
-        margin-bottom: 10px;
-        display: block;
-      }
-    </style>
+    <title>Cookie Manager</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <h1>Cookie Manager</h1>
-    <div id="cookie-list"></div>
-    <!-- Buton pentru ștergerea tuturor cookie-urilor -->
-    <button id="delete-all-button">Șterge toate cookie-urile</button>
+    <div class="nav">
+      <!-- Add the logo image in the navbar -->
+      <img src="./images/logo.png" alt="Logo" class="logo" />
+    </div>
+    <div class="content">
+      <div class="selector">
+        <!-- Slider for animation -->
+        <div class="slider"></div>
+        <!-- Buttons -->
+        <div class="left-selector selected">this site</div>
+        <div class="right-selector">all sites</div>
+      </div>
+
+      <div id="cookie-list"></div>
+      <!-- Button to delete all cookies -->
+      <button id="delete-all-button">Șterge toate cookie-urile</button>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -3,7 +3,7 @@
   "name": "Cookie Manager",
   "version": "1.0",
   "description": "Extensie Chrome care respinge automat cookie-urile de advertising.",
-  "permissions": ["cookies", "storage", "activeTab", "scripting"],
+  "permissions": ["cookies", "storage", "activeTab", "scripting", "storage"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
@@ -16,6 +16,11 @@
     }
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   }
 }

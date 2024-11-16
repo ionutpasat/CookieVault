@@ -1,0 +1,112 @@
+/* Ensure the body of the popup has rounded corners */
+body {
+  width: 400px;
+  margin: 0;
+  height: 100vh; /* Height should be 100% of the viewport height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px; /* Apply rounded corners to the entire popup */
+  overflow: hidden; /* Prevent content from overflowing */
+  background-color: #ffffff; /* Set a background color */
+  font-family: "Inter", sans-serif;
+}
+
+/* Navbar should have rounded top corners */
+.nav {
+  width: 100%;
+  background-color: #d9d9d9;
+  color: white;
+  height: 75px;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  border-top-left-radius: 15px; /* Rounded top-left corner */
+  border-top-right-radius: 15px; /* Rounded top-right corner */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  /* border-bottom: solid #ffffff; */
+}
+
+/* Style for the logo */
+.logo {
+  height: 40px; /* Set a height for the logo */
+  margin-right: 10px; /* Add space between the logo and the text */
+}
+
+/* Content should have rounded bottom corners */
+.content {
+  height: 75%;
+  width: 100%;
+  flex-grow: 1;
+  text-align: center;
+  background-color: #d9d9d9;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Selector container */
+/* Selector container */
+.selector {
+  margin: 0;
+  height: 45px;
+  width: 80%;
+  background-color: #c5c5c5;
+  border-radius: 40px;
+  display: flex;
+  position: relative; /* Required for positioning the slider */
+  overflow: hidden;
+}
+
+/* Slider for active state */
+.slider {
+  position: absolute;
+  height: 100%;
+  width: 50%; /* Matches the width of one button */
+  background-color: #090000; /* Active background color */
+  border-radius: 40px; /* Keep the same rounded edges */
+  transition: transform 0.3s ease; /* Smooth sliding animation */
+  z-index: 0; /* Slider stays behind the text */
+}
+
+/* Default button styles */
+.left-selector,
+.right-selector {
+  height: 100%;
+  width: 50%;
+  background: transparent; /* Transparent to show the slider */
+  z-index: 1; /* Buttons stay above the slider */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-weight: bold;
+  color: black; /* Default text color */
+  transition: color 0.3s ease; /* Smooth text color transition */
+}
+
+/* Active text color */
+.left-selector.selected,
+.right-selector.selected {
+  color: white;
+}
+
+/* Default selected for left button on load */
+.left-selector.default-selected {
+  background-color: #090000; /* Active background */
+  color: white; /* Active text color */
+}
+
+/* Button styling */
+button {
+  margin: 20px 0;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px; /* Round button corners */
+}
