@@ -10,6 +10,9 @@ chrome.runtime.onStartup.addListener(() => {
 
 chrome.webNavigation.onCompleted.addListener((details) => {
   processAllCookies();
+  getCurrentTabDomain((currentDomain) => {
+    checkDataBreach(currentDomain);
+  });
 }, { url: [{ urlMatches: 'http://*/*' }, { urlMatches: 'https://*/*' }] });
 
 // Function to send a message to the content script to remove consent and cookie elements
@@ -161,8 +164,6 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
               }
             });
           }
-      
-          processAllCookies();
         }
         console.log('Block all switch is enabled');
       } else if (!changeInfo.removed) {
@@ -248,25 +249,25 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 });
 
 function processAllCookies() {
-  chrome.cookies.getAll({}, (cookies) => {
-    cookies.forEach((cookie) => {
-      if (isUnwantedCookie(cookie)) {
-        // Remove the cookie if it is an advertising cookie
-        getCurrentTabDomain((currentDomain) => {
-          if (currentDomain && !isCurrentDomainOrGoogleCookie(cookie, currentDomain)) {
-            chrome.cookies.remove({
-              url: `https://${cookie.domain}${cookie.path}`,
-              name: cookie.name
-            }, () => {
-              if (chrome.runtime.lastError) {
-                console.error("Error removing cookie:", chrome.runtime.lastError);
-              } else {
-                console.log(`Advertising cookie removed: ${cookie.name}  from ${cookie.domain} with value: ${cookie.value}`);
-              }
-            });
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const url = new URL(tabs[0].url);
+    const domain = url.hostname;
+
+    // Handle blocking cookies for the current domain
+    chrome.storage.sync.get('blockedDomains', (result) => {
+      let blockedDomains = result.blockedDomains || [];
+      // Add the domain to the blocked list
+      chrome.storage.sync.get('visitedDomains', (alreadyVisited) => {
+        let visitedDomains = alreadyVisited.visitedDomains || [];
+        if (!blockedDomains.includes(domain)) {
+          if (!visitedDomains.includes(domain)) {
+            blockedDomains.push(domain);
+            visitedDomains.push(domain);
+            chrome.storage.sync.set({ visitedDomains: visitedDomains }, () => {});
+            chrome.storage.sync.set({ blockedDomains: blockedDomains }, () => {});
           }
-        });
-      }
+        }
+      });
     });
   });
 }
@@ -355,4 +356,61 @@ function isAnalyticsCookie(cookie) {
 
   return analyticsKeywords.some(keyword => cookieName.includes(keyword))
     || analyticsDomainKeywords.some(domainKeyword => cookieDomain.includes(domainKeyword));
+}
+
+async function checkDataBreach(domain) {
+  const apiKey = "ab62cea28a114653909fa9ef1547d590";
+  const url = `https://haveibeenpwned.com/api/v3/breaches?domain=${domain}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "hibp-api-key": apiKey,
+        "Accept": "application/json"
+      }
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      if (data.length > 0) {
+        const breaches = data.map(breach => `${breach.Name} (Data: ${breach.BreachDate})`).join("\n");
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "icons/icon16.png", // Replace with the path to your extension's icon
+          title: `Site-ul ${domain} a fost compromis`,
+          message: `Site-ul ${domain} a fost compromis în următoarele breșe de securitate:\n${breaches}`
+        });
+      } else {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "icons/icon16.png", // Replace with the path to your extension's icon
+          title: `Site-ul ${domain}`,
+          message: `Site-ul ${domain} NU apare în breșele de securitate cunoscute.`
+        });
+      }
+    } else if (response.status === 404) {
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: "icons/icon16.png", // Replace with the path to your extension's icon
+        title: `Site-ul ${domain}`,
+        message: `Site-ul ${domain} NU apare în breșele de securitate cunoscute.`
+      });
+    } else {
+      console.error("Eroare la verificare:", response.status);
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: "icons/icon16.png", // Replace with the path to your extension's icon
+        title: "Eroare la verificare",
+        message: "A apărut o eroare la verificarea breșelor de securitate."
+      });
+    }
+  } catch (error) {
+    console.error("Eroare:", error);
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "icons/icon16.png", // Replace with the path to your extension's icon
+      title: "Eroare",
+      message: "Nu s-a putut verifica starea site-ului."
+    });
+  }
 }
