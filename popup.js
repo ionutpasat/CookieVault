@@ -22,36 +22,36 @@ function removeAllCookies() {
 // Încarcă lista de cookie-uri
 function loadCookies() {
   const cookieList = document.getElementById('cookie-list');
-  cookieList.innerHTML = "<ul>Încărcăm lista de cookie-uri...</ul>";
+  // cookieList.innerHTML = "<ul>Încărcăm lista de cookie-uri...</ul>";
   
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const url = tabs[0].url;
-    chrome.cookies.getAll({ url: url }, (cookies) => {
-      cookieList.innerHTML = ''; // Golește lista înainte de afișare
-      const ul = document.createElement('ul');
+  // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  //   const url = tabs[0].url;
+  //   chrome.cookies.getAll({ url: url }, (cookies) => {
+  //     cookieList.innerHTML = ''; // Golește lista înainte de afișare
+  //     const ul = document.createElement('ul');
 
-      if (cookies.length === 0) {
-        cookieList.innerHTML = '<p>Nu există cookie-uri pentru acest domeniu.</p>';
-        return;
-      }
+  //     if (cookies.length === 0) {
+  //       cookieList.innerHTML = '<p>Nu există cookie-uri pentru acest domeniu.</p>';
+  //       return;
+  //     }
 
-      cookies.forEach((cookie) => {
-        const li = document.createElement('li');
-        li.textContent = `${cookie.name} (${cookie.domain})`;
+  //     cookies.forEach((cookie) => {
+  //       const li = document.createElement('li');
+  //       li.textContent = `${cookie.name} (${cookie.domain})`;
 
-        // Buton pentru ștergerea cookie-ului
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Șterge';
-        deleteButton.style.marginLeft = '10px';
-        deleteButton.onclick = () => removeCookie(cookie);
+  //       // Buton pentru ștergerea cookie-ului
+  //       const deleteButton = document.createElement('button');
+  //       deleteButton.textContent = 'Șterge';
+  //       deleteButton.style.marginLeft = '10px';
+  //       deleteButton.onclick = () => removeCookie(cookie);
 
-        li.appendChild(deleteButton);
-        ul.appendChild(li);
-      });
+  //       li.appendChild(deleteButton);
+  //       ul.appendChild(li);
+  //     });
 
-      cookieList.appendChild(ul);
-    });
-  });
+  //     cookieList.appendChild(ul);
+  //   });
+  // });
 }
 
 // Funcție pentru ștergerea unui cookie specific
@@ -75,11 +75,58 @@ function removeCookie(cookie) {
 // Adaugă eveniment pentru butonul „Șterge toate cookie-urile”
 document.addEventListener('DOMContentLoaded', () => {
   const deleteAllButton = document.getElementById('delete-all-button');
-  deleteAllButton.addEventListener('click', removeAllCookies);
+  if (deleteAllButton) {
+    deleteAllButton.addEventListener('click', removeAllCookies);
+  }
 
   loadCookies();
+  loadSwitchStates();
 });
 
+// Save switch state to chrome.storage
+function saveSwitchState(switchId, state) {
+  const switchState = {};
+  switchState[switchId] = state;
+  chrome.storage.sync.set(switchState, () => {
+    if (chrome.runtime.lastError) {
+      console.error('Eroare la salvarea stării switch-ului:', chrome.runtime.lastError);
+    }
+  });
+}
+
+// Load switch states from chrome.storage
+function loadSwitchStates() {
+  const switches = document.querySelectorAll('.switch, .grid-switch');
+  const blockSwitch = document.querySelectorAll('.block-switch');
+  switches.forEach((switchElement) => {
+    const switchId = switchElement.id;
+    chrome.storage.sync.get(switchId, (result) => {
+      if (result[switchId] !== undefined) {
+        switchElement.checked = result[switchId];
+      }
+    });
+    switchElement.addEventListener('change', () => {
+      saveSwitchState(switchId, switchElement.checked);
+      refreshCurrentTab();
+    });
+  });
+  blockSwitch.forEach((blockSwitchElement) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const url = new URL(tabs[0].url);
+      const domain = url.hostname;
+      chrome.storage.sync.get('blockedDomains', (result) => {
+        const blockedDomains = result.blockedDomains || [];
+        console.log('Blocked domains:', blockedDomains);
+        if (blockedDomains.includes(domain)) {
+          blockSwitchElement.checked = true;
+        } else {
+          blockSwitchElement.checked = false;
+        }
+      });
+    });
+    saveSwitchState(blockSwitchElement.id, blockSwitchElement.checked);
+  });
+}
 
 // Select the elements
 const slider = document.querySelector('.slider');
@@ -90,8 +137,6 @@ const rightSelector = document.querySelector('.right-selector');
 slider.style.transform = 'translateX(0)'; // Initially under the left selector
 
 // Add click event listener for the left selector
-// Select the block-all-cookies container
-// Select the block-all-cookies container
 const switchGridContainer = document.querySelector('.switch-grid');
 const blockAllCookiesContainer = document.querySelector('.block-all-cookies');
 
@@ -125,34 +170,45 @@ rightSelector.addEventListener('click', function () {
   switchGridContainer.classList.remove('hide');
 });
 
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const deleteAllButton = document.getElementById('delete-all-button');
-  deleteAllButton.addEventListener('click', removeAllCookies);
-
-  loadCookies();
-});
+function refreshCurrentTab() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      chrome.tabs.reload(tabs[0].id);
+    }
+  });
+}
 
 // Function to toggle blocking cookies
 function toggleBlockCookies() {
   const isBlocked = document.getElementById('block-all-switch').checked;
 
-  if (isBlocked) {
-    // If checked, block all cookies (you can customize this logic further)
-    chrome.cookies.getAll({}, (cookies) => {
-      cookies.forEach((cookie) => {
-        chrome.cookies.remove({
-          url: `https://${cookie.domain}${cookie.path}`,
-          name: cookie.name,
-        });
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const url = new URL(tabs[0].url);
+    const domain = url.hostname;
+
+    // Handle blocking cookies for the current domain
+    chrome.storage.sync.get('blockedDomains', (result) => {
+      let blockedDomains = result.blockedDomains || [];
+      if (isBlocked) {
+        // Add the domain to the blocked list
+        if (!blockedDomains.includes(domain)) {
+          blockedDomains.push(domain);
+          console.log('Added domain to blocked list:', domain);
+          console.log('Blocked domains now are:', blockedDomains);
+        }
+      } else {
+        // Remove the domain from the blocked list
+        blockedDomains = blockedDomains.filter(d => d !== domain);
+      }
+      chrome.storage.sync.set({ blockedDomains: blockedDomains }, () => {
+        refreshCurrentTab();
       });
     });
-  } else {
-    // If unchecked, allow cookies (you can customize this logic further if needed)
-    console.log('Allow cookies'); // This could be an extension feature to track cookie behavior
-  }
+  });
 }
 
-// Event listener for the block cookies switch
-document.getElementById('block-all-switch').addEventListener('change', toggleBlockCookies);
+
+// // Event listener for the block cookies switch
+document.getElementById('block-all-switch').addEventListener('change', () => {
+  toggleBlockCookies();
+});

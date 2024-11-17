@@ -43,24 +43,49 @@ function removeConsentAndCookieElements() {
   
   // Log to verify that the content script is loaded
   console.log("Content script loaded");
-  
-  // Run the function when the content script is loaded
-  removeConsentAndCookieElements();
-  
-  // Also run the function when the page is fully loaded
-  window.addEventListener('load', () => {
-    console.log("Page fully loaded");
+
+  // Listen for messages from the background script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "removeConsentAndCookieElements") {
     removeConsentAndCookieElements();
-  });
+    sendResponse({status: "success"});
+  }
+});
+  
+  // // Also run the function when the page is fully loaded
+  // window.addEventListener('load', () => {
+  //   console.log("Page fully loaded");
+  //   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  //     const url = new URL(tabs[0].url);
+  //     const domain = url.hostname;
+  //     chrome.storage.sync.get('blockedDomains', (result) => {
+  //       const blockedDomains = result.blockedDomains || [];
+  //       console.log('Blocked domainsfrom content.js:', blockedDomains);
+  //       if (blockedDomains.includes(domain)) {
+  //         removeConsentAndCookieElements();
+  //       }
+  //     });
+  //   });
+  // });
   
   // Set up a MutationObserver to watch for changes in the DOM
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'childList') {
-        removeConsentAndCookieElements();
-      }
-    });
-  });
+  // const observer = new MutationObserver((mutations) => {
+  //   mutations.forEach((mutation) => {
+  //     if (mutation.type === 'childList') {
+  //       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  //         const url = new URL(tabs[0].url);
+  //         const domain = url.hostname;
+  //         chrome.storage.sync.get('blockedDomains', (result) => {
+  //           const blockedDomains = result.blockedDomains || [];
+  //           console.log('Blocked domainsfrom content.js:', blockedDomains);
+  //           if (blockedDomains.includes(domain)) {
+  //             removeConsentAndCookieElements();
+  //           }
+  //         });
+  //       });
+  //     }
+  //   });
+  // });
   
-  // Start observing the document for changes
-  observer.observe(document.body, { childList: true, subtree: true });
+  // // Start observing the document for changes
+  // observer.observe(document.body, { childList: true, subtree: true });
